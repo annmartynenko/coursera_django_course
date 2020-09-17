@@ -16,7 +16,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Used for a default title
-APP_NAME = 'ChucksList'   # Add
+APP_NAME = 'MYsite'   # Add
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -27,7 +27,7 @@ SECRET_KEY = 'g$iqqu&*mw4_sg3(#ld0sqaalxebel&168^yj%i&sgrw(fmn@w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ '*' ]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -41,19 +41,26 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # Extensions - installed with pip3 / requirements.txt
-    'django_extensions',
-    'crispy_forms',
+
     'rest_framework',
     'social_django',
+    'django_extensions',
+    'crispy_forms',
+
     'home.apps.HomeConfig',
     'ads.apps.AdsConfig',
+    'hello.apps.HelloConfig',
+    'autos.apps.AutosConfig',
+    'cats.apps.CatsConfig',
+    'polls.apps.PollsConfig',
 
     # Sample Applications - don't copy
+    'unesco.apps.UnescoConfig',  # Add
 
 ]
 
 # When we get to crispy forms :)
-CRISPY_TEMPLATE_PACK = 'bootstrap3' # Add
+CRISPY_TEMPLATE_PACK = 'bootstrap3'    # Add
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
