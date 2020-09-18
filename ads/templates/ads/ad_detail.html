@@ -39,11 +39,11 @@
 <p>
 	{{ ad.price }}
 </p>
-    {% for comment in comments %}
-<p> {{ comment.text }}
-({{ comment.updated_at|naturaltime }})
-{% if user == comment.owner %}
-<a href="{% url 'forums:forum_comment_delete' comment.id %}"><i class="fa fa-trash"></i></a>
+    {% for commen in comment %}
+<p> {{ commen.text }}
+({{ commen.updated_at|naturaltime }})
+{% if user == commen.owner %}
+<a href="{% url 'ads:ad_comment_delete' commen.id %}"><i class="fa fa-trash"></i></a>
 {% endif %}
 </p>
 {% endfor %}
