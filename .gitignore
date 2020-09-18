@@ -11,4 +11,5 @@ media/
 
 *.py[cod]
 venv/
+env/
 *migrations/
