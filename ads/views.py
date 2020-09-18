@@ -4,7 +4,7 @@ from ads.owner import OwnerListView, OwnerDetailView, OwnerCreateView, OwnerUpda
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from ads.forms import CreateForm, CommentForm
 
 
@@ -23,6 +23,7 @@ class AdDetailView(OwnerDetailView):
         comment_form = CommentForm()
         context = {'ad': x, 'comments': comments, 'comment_form': comment_form}
         return render(request, self.template_name, context)
+
 
 class AdCreateView(LoginRequiredMixin, View):
     model = Ad
@@ -47,6 +48,7 @@ class AdCreateView(LoginRequiredMixin, View):
         pic.owner = self.request.user
         pic.save()
         return redirect(self.success_url)
+
 
 class AdUpdateView(LoginRequiredMixin, View):
     model = Ad
@@ -87,10 +89,20 @@ def stream_file(request, pk) :
 
 class CommentCreateView(OwnerCreateView):
     model = Comment
-    fields = ['title', 'text']
-    template_name = "ads/ad_form.html"
+    fields = ['text']
+    template_name = "ad_form.html"
+
+    def post(self, request, pk):
+        f = get_object_or_404(Ad, id=pk)
+        comment = Comment(text=request.POST['comment'], owner=request.user, ad=f)
+        comment.save()
+        return redirect(reverse('ads:ad_detail', args=[pk]))
 
 
 class CommentDeleteView(OwnerDeleteView):
     model = Comment
     template_name = "ads/comment_delete.html"
+
+    def get_success_url(self):
+        forum = self.object.ad
+        return reverse('ads:ad_detail', args=[forum.id])
