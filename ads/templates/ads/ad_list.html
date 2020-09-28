@@ -14,9 +14,9 @@
         {% if user.is_authenticated %}
         <!-- Two hrefs with two stacked icons each - one showing and one hidden -->
         <a href="#" onclick=
-            "favPost('{% url 'favs:thing_unfavorite' thing.id %}', {{ thing.id }} );return false;"
-            {% if thing.id not in favorites %} style="display: none;" {% endif %}
-            id="favorite_star_{{thing.id}}">
+            "favPost('{% url 'ads:ad_unfavorite' ad.id %}', {{ ad.id }} );return false;"
+            {% if ad.id not in favorites %} style="display: none;" {% endif %}
+            id="favorite_star_{{ad.id}}">
         <span class="fa-stack" style="vertical-align: middle;">
         <i class="fa fa-star fa-stack-1x" style="color: orange;"></i>
         <i class="fa fa-star-o fa-stack-1x"></i>
@@ -24,9 +24,9 @@
         </a>
         <!-- the second href -->
         <a href="#" onclick=
-             "favPost('{% url 'favs:thing_favorite' thing.id %}', {{ thing.id }} );return false;"
-            {% if thing.id in favorites %} style="display: none;" {% endif %}
-            id="unfavorite_star_{{thing.id}}">
+             "favPost('{% url 'ads:ad_favorite' ad.id %}', {{ ad.id }} );return false;"
+            {% if ad.id in favorites %} style="display: none;" {% endif %}
+            id="unfavorite_star_{{ad.id}}">
         <span class="fa-stack" style="vertical-align: middle;">
         <i class="fa fa-star fa-stack-1x" style="display: none; color: orange;"></i>
         <i class="fa fa-star-o fa-stack-1x"></i>
@@ -49,12 +49,12 @@
 {% endif %}
 </p>
     <script>
-function favPost(url, thing_id) {
+function favPost(url, ad_id) {
     console.log('Requesting JSON');
     $.post(url, {},  function(rowz){
         console.log(url, 'finished');
-        $("#unfavorite_star_"+thing_id).toggle();
-        $("#favorite_star_"+thing_id).toggle();
+        $("#unfavorite_star_"+ad_id).toggle();
+        $("#favorite_star_"+ad_id).toggle();
     }).fail(function(xhr) {
         alert('Url failed with '+xhr.status+' '+url);
     });

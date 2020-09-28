@@ -11,17 +11,18 @@ from ads.forms import CreateForm, CommentForm
 class AdListView(OwnerListView):
     model = Ad
     # By convention:
-    # template_name = "myarts/article_list.html"
+    template_name = "ads/ad_list.html"
 
     def get(self, request):
-        thing_list = Ad.objects.all()
+        ad_list = Ad.objects.all()
         favorites = list()
         if request.user.is_authenticated:
             # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
-            rows = request.user.favorite_things.values('id')
+            rows = request.user.favorite_ads.values('id')
+            print(request.user.favorite_ads)
             # favorites = [2, 4, ...] using list comprehension
             favorites = [row['id'] for row in rows]
-        ctx = {'thing_list': thing_list, 'favorites': favorites}
+        ctx = {'ad_list': ad_list, 'favorites': favorites}
         return render(request, self.template_name, ctx)
 
 class AdDetailView(OwnerDetailView):
@@ -130,7 +131,7 @@ class AddFavoriteView(LoginRequiredMixin, View):
     def post(self, request, pk) :
         print("Add PK",pk)
         t = get_object_or_404(Ad, id=pk)
-        fav = Fav(user=request.user, thing=t)
+        fav = Fav(user=request.user, ad=t)
         try:
             fav.save()  # In case of duplicate key
         except IntegrityError as e:
@@ -143,7 +144,7 @@ class DeleteFavoriteView(LoginRequiredMixin, View):
         print("Delete PK",pk)
         t = get_object_or_404(Ad, id=pk)
         try:
-            fav = Fav.objects.get(user=request.user, thing=t).delete()
+            fav = Fav.objects.get(user=request.user, ad=t).delete()
         except Fav.DoesNotExist as e:
             pass
 
