@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from ads.models import Ad, Comment
+from ads.models import Ad, Comment, Fav
 from ads.owner import OwnerListView, OwnerDetailView, OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
@@ -12,6 +12,17 @@ class AdListView(OwnerListView):
     model = Ad
     # By convention:
     # template_name = "myarts/article_list.html"
+
+    def get(self, request):
+        thing_list = Ad.objects.all()
+        favorites = list()
+        if request.user.is_authenticated:
+            # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
+            rows = request.user.favorite_things.values('id')
+            # favorites = [2, 4, ...] using list comprehension
+            favorites = [row['id'] for row in rows]
+        ctx = {'thing_list': thing_list, 'favorites': favorites}
+        return render(request, self.template_name, ctx)
 
 class AdDetailView(OwnerDetailView):
     model = Ad
@@ -106,3 +117,34 @@ class CommentDeleteView(OwnerDeleteView):
     def get_success_url(self):
         forum = self.object.ad
         return reverse('ads:ad_detail', args=[forum.id])
+
+# csrf exemption in class based views
+# https://stackoverflow.com/questions/16458166/how-to-disable-djangos-csrf-validation
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.db.utils import IntegrityError
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AddFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Add PK",pk)
+        t = get_object_or_404(Ad, id=pk)
+        fav = Fav(user=request.user, thing=t)
+        try:
+            fav.save()  # In case of duplicate key
+        except IntegrityError as e:
+            pass
+        return HttpResponse()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Delete PK",pk)
+        t = get_object_or_404(Ad, id=pk)
+        try:
+            fav = Fav.objects.get(user=request.user, thing=t).delete()
+        except Fav.DoesNotExist as e:
+            pass
+
+        return HttpResponse()
