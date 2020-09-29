@@ -6,6 +6,9 @@ from django.views import View
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from ads.forms import CreateForm, CommentForm
+from django.db.models import Q
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from ads.utils import dump_queries
 
 
 class AdListView(OwnerListView):
@@ -14,16 +17,33 @@ class AdListView(OwnerListView):
     template_name = "ads/ad_list.html"
 
     def get(self, request):
-        ad_list = Ad.objects.all()
         favorites = list()
+        strval = request.GET.get("search", False)
         if request.user.is_authenticated:
             # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
             rows = request.user.favorite_ads.values('id')
             print(request.user.favorite_ads)
             # favorites = [2, 4, ...] using list comprehension
             favorites = [row['id'] for row in rows]
-        ctx = {'ad_list': ad_list, 'favorites': favorites}
-        return render(request, self.template_name, ctx)
+        if strval:
+            # Simple title-only search
+            # objects = Post.objects.filter(title__contains=strval).select_related().order_by('-updated_at')[:10]
+
+            # Multi-field search
+            query = Q(title__contains=strval)
+            query.add(Q(text__contains=strval), Q.OR)
+            objects = Ad.objects.filter(query).select_related().order_by('-updated_at')[:10]
+        else:
+            # try both versions with > 4 posts and watch the queries that happen
+            objects = Ad.objects.all().order_by('-updated_at')[:10]
+            # objects = Post.objects.select_related().all().order_by('-updated_at')[:10]
+            # Augment the post_list
+        for obj in objects:
+            obj.natural_updated = naturaltime(obj.updated_at)
+        ctx = {'ad_list': objects, 'favorites': favorites,  'search': strval}
+        retval = render(request, self.template_name, ctx)
+        dump_queries()
+        return retval
 
 class AdDetailView(OwnerDetailView):
     model = Ad
